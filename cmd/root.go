@@ -16,6 +16,7 @@ var rootCmd = &cobra.Command{
          The purpose of this project is to learn how docker works and how to
          write a docker by ourselves
          Enjoy it, just for fun.`,
+	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 	Run: func(cmd *cobra.Command, args []string) {
 		// Do Stuff Here
 	},
@@ -38,7 +39,6 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
 	rootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "author name for copyright attribution")
-	rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "name of license for the project")
 	rootCmd.PersistentFlags().Bool("viper", true, "use Viper for configuration")
 	_ = viper.BindPFlag("author", rootCmd.PersistentFlags().Lookup("author"))
 	_ = viper.BindPFlag("useViper", rootCmd.PersistentFlags().Lookup("viper"))
