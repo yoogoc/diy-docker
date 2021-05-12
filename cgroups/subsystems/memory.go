@@ -2,7 +2,6 @@ package subsystems
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"strconv"
@@ -16,7 +15,6 @@ type MemorySubSystem struct {
 func (s *MemorySubSystem) Set(cgroupPath string, res *ResourceConfig) error {
 	if subsysCgroupPath, err := GetCgroupPath(s.Name(), cgroupPath, true); err == nil {
 		if res.MemoryLimit != "" {
-			log.Printf("MemoryLimit %v", res.MemoryLimit)
 			logrus.Infof("subsysCgroupPath %v", subsysCgroupPath)
 			if err := os.WriteFile(path.Join(subsysCgroupPath, "memory.limit_in_bytes"), []byte(res.MemoryLimit), 0644); err != nil {
 				logrus.Infof("set cgroup memory fail: %v", err)

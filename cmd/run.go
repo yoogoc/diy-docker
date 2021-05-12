@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +47,7 @@ func Run(tty bool, commands []string) {
 		return
 	}
 	if err := parent.Start(); err != nil {
-		log.Fatal(err)
+		logrus.Errorf("process start error: %v", err)
 	}
 
 	cgroupManager := cgroups.NewCgroupManager("diy-docker-cgroup")
@@ -66,7 +67,7 @@ func Run(tty bool, commands []string) {
 	sendInitCommand(commands, writePipe)
 
 	if err := parent.Wait(); err != nil {
-		log.Fatal(err)
+		logrus.Errorf("process wait error: %v", err)
 	}
 	log.Print("exit")
 }

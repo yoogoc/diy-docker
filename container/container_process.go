@@ -18,6 +18,7 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS |
 			syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
+		Unshareflags: syscall.CLONE_NEWNS,
 	}
 	if tty {
 		cmd.Stdout = os.Stdout
@@ -25,6 +26,7 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 		cmd.Stderr = os.Stderr
 	}
 	cmd.ExtraFiles = []*os.File{readPipe}
+	cmd.Dir = "/root/busybox"
 	return cmd, writePipe
 }
 
