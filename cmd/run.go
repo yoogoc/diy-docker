@@ -14,6 +14,7 @@ import (
 
 var (
 	tty bool
+	volume string
 	res = subsystems.ResourceConfig{}
 )
 
@@ -23,6 +24,7 @@ func init() {
 	runCmd.PersistentFlags().StringVar(&res.CpuSet, "cpuset", "", "cpu limit")
 	runCmd.PersistentFlags().StringVar(&res.CpuShare, "cpushare", "", "cpu share")
 	runCmd.PersistentFlags().StringVarP(&res.MemoryLimit, "memory", "m", "", "memory limit")
+	runCmd.PersistentFlags().StringVarP(&volume, "volume", "v", "", "volume")
 
 	rootCmd.AddCommand(runCmd)
 }
@@ -40,7 +42,7 @@ var runCmd = &cobra.Command{
 }
 
 func Run(tty bool, commands []string) {
-	parent, writePipe := container.NewParentProcess(tty)
+	parent, writePipe := container.NewParentProcess(tty, volume)
 
 	if parent == nil {
 		log.Fatal("New parent process error")
@@ -72,7 +74,7 @@ func Run(tty bool, commands []string) {
 
 	mntURL := "/root/mnt/"
 	rootURL := "/root/"
-	container.DeleteWorkSpace(rootURL, mntURL)
+	container.DeleteWorkSpace(rootURL, mntURL, volume)
 	log.Print("exit")
 }
 

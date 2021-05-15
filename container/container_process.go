@@ -7,7 +7,7 @@ import (
 	"syscall"
 )
 
-func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
 		log.Fatalf("New pipe error %v", err)
@@ -29,7 +29,7 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 
 	mntUrl := "/root/mnt/"
 	rootUrl := "/root/"
-	NewWorkSpace(rootUrl, mntUrl)
+	NewWorkSpace(rootUrl, mntUrl, volume)
 
 	cmd.Dir = mntUrl
 	return cmd, writePipe
