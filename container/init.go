@@ -44,7 +44,7 @@ func setUpMount() {
 	logrus.Infof("pwd is: %v", pwd)
 
 	if err := pivotRoot(pwd); err != nil {
-		// panic(fmt.Errorf("pivot root error: %v", err))
+		panic(fmt.Errorf("pivot root error: %v", err))
 	}
 
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
@@ -68,6 +68,7 @@ func readUserCommands() []string {
 
 // pivotRoot 将进程切换至新的文件系统
 func pivotRoot(root string) error {
+	logrus.Info("pivot root")
 
 	// 1. 先重新mount一下旧的root
 	if err := syscall.Mount(root, root, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
@@ -101,5 +102,9 @@ func pivotRoot(root string) error {
 	}
 
 	// 6. 移除旧的目录
-	return os.Remove(pivotPath)
+	if err := os.Remove(pivotPath); err != nil {
+		return err
+	}
+
+	return nil
 }

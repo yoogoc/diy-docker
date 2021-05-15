@@ -69,6 +69,10 @@ func Run(tty bool, commands []string) {
 	if err := parent.Wait(); err != nil {
 		logrus.Errorf("process wait error: %v", err)
 	}
+
+	mntURL := "/root/mnt/"
+	rootURL := "/root/"
+	container.DeleteWorkSpace(rootURL, mntURL)
 	log.Print("exit")
 }
 
