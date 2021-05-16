@@ -1,7 +1,6 @@
 package container
 
 import (
-	"diy-docker/utils"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -12,13 +11,10 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-func RecordContainer(pid int, commands []string, name string) (string, error) {
-	id := utils.RandStringBytes(10)
+func RecordContainer(pid int, commands []string, name string, id string) (string, error) {
+
 	createdAt := time.Now().Format("2006-01-02 15:04:05")
 	commandString := strings.Join(commands, ",")
-	if name == "" {
-		name = id
-	}
 	container := &Container{
 		Pid:         strconv.Itoa(pid),
 		Id:          id,

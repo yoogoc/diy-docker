@@ -1,11 +1,12 @@
 package container
 
 var (
-	RUNNING = "running"
-	STOP = "stopping"
-	EXIT = "exited"
+	RUNNING                  = "running"
+	STOP                     = "stopping"
+	EXIT                     = "exited"
 	DefaultContainerLocation = "/var/run/diydocker/%s/"
-	ConfigName = "config.json"
+	ConfigName               = "config.json"
+	LogFile                  = "container.log"
 )
 
 type Container struct {

@@ -1,16 +1,18 @@
 package container
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"os/exec"
 	"syscall"
+
+	"github.com/Sirupsen/logrus"
 )
 
-func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, containerName string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
-		log.Fatalf("New pipe error %v", err)
+		logrus.Errorf("New pipe error %v", err)
 		return nil, nil
 	}
 
@@ -24,6 +26,23 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 		cmd.Stdout = os.Stdout
 		cmd.Stdin = os.Stdin
 		cmd.Stderr = os.Stderr
+	} else {
+		dirUrl := fmt.Sprintf(DefaultContainerLocation, containerName)
+
+		if err := os.MkdirAll(dirUrl, 0622); err != nil {
+			logrus.Errorf("mkdir %v error %v", dirUrl, err)
+			return nil, nil
+		}
+
+		stdLogFilePath := dirUrl + LogFile
+		stdLogFile, err := os.Create(stdLogFilePath)
+		logrus.Infof("log by %v", stdLogFilePath)
+		if err != nil {
+			logrus.Errorf("create log file error %v", err)
+			return nil, nil
+		}
+
+		cmd.Stdout = stdLogFile
 	}
 	cmd.ExtraFiles = []*os.File{readPipe}
 

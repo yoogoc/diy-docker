@@ -4,6 +4,7 @@ import (
 	"diy-docker/cgroups"
 	"diy-docker/cgroups/subsystems"
 	"diy-docker/container"
+	"diy-docker/utils"
 	"fmt"
 	"log"
 	"os"
@@ -52,7 +53,11 @@ var runCmd = &cobra.Command{
 }
 
 func Run(commands []string) {
-	parent, writePipe := container.NewParentProcess(tty, volume)
+	id := utils.RandStringBytes(10)
+	if containerName == "" {
+		containerName = id
+	}
+	parent, writePipe := container.NewParentProcess(tty, volume, containerName)
 
 	if parent == nil {
 		log.Fatal("New parent process error")
@@ -62,7 +67,7 @@ func Run(commands []string) {
 		logrus.Errorf("process start error: %v", err)
 	}
 
-	if _, err := container.RecordContainer(parent.Process.Pid, commands, containerName); err != nil {
+	if _, err := container.RecordContainer(parent.Process.Pid, commands, containerName, id); err != nil {
 		logrus.Errorf("record container error: %v", err)
 		return
 	}

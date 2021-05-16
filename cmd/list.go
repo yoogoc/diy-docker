@@ -20,5 +20,3 @@ var listCmd = &cobra.Command{
 		container.ListContainers()
 	},
 }
-
-
