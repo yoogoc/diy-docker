@@ -20,4 +20,3 @@ var commitCmd = &cobra.Command{
 		container.CommitContainer(args[0])
 	},
 }
-

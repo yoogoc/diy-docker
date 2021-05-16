@@ -4,6 +4,7 @@ import (
 	"diy-docker/cgroups"
 	"diy-docker/cgroups/subsystems"
 	"diy-docker/container"
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -13,9 +14,11 @@ import (
 )
 
 var (
-	tty bool
+	tty    bool
+	detach bool
 	volume string
-	res = subsystems.ResourceConfig{}
+	containerName string
+	res    = subsystems.ResourceConfig{}
 )
 
 func init() {
@@ -25,23 +28,30 @@ func init() {
 	runCmd.PersistentFlags().StringVar(&res.CpuShare, "cpushare", "", "cpu share")
 	runCmd.PersistentFlags().StringVarP(&res.MemoryLimit, "memory", "m", "", "memory limit")
 	runCmd.PersistentFlags().StringVarP(&volume, "volume", "v", "", "volume")
+	runCmd.PersistentFlags().BoolVarP(&detach, "detach", "d", false, "detach run")
+	runCmd.PersistentFlags().StringVar(&containerName, "name", "", "set name")
 
 	rootCmd.AddCommand(runCmd)
 }
 
 var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Create a container",
-	Long:  `Create a container with namespace and cgroups limit diydocker run - t i [command ]`,
+	Use:                "run",
+	Short:              "Create a container",
+	Long:               `Create a container with namespace and cgroups limit diydocker run - t i [command ]`,
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-	Args: cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	Args:               cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
 		cmd.SilenceUsage = true
-		Run(tty, args)
+		if detach && tty {
+			return fmt.Errorf("ti and d can't both provided")
+		}
+
+		Run(args)
+		return nil
 	},
 }
 
-func Run(tty bool, commands []string) {
+func Run(commands []string) {
 	parent, writePipe := container.NewParentProcess(tty, volume)
 
 	if parent == nil {
@@ -50,6 +60,11 @@ func Run(tty bool, commands []string) {
 	}
 	if err := parent.Start(); err != nil {
 		logrus.Errorf("process start error: %v", err)
+	}
+
+	if _, err := container.RecordContainer(parent.Process.Pid, commands, containerName); err != nil {
+		logrus.Errorf("record container error: %v", err)
+		return
 	}
 
 	cgroupManager := cgroups.NewCgroupManager("diy-docker-cgroup")
@@ -68,14 +83,16 @@ func Run(tty bool, commands []string) {
 
 	sendInitCommand(commands, writePipe)
 
-	if err := parent.Wait(); err != nil {
-		logrus.Errorf("process wait error: %v", err)
+	if tty {
+		if err := parent.Wait(); err != nil {
+			logrus.Errorf("process wait error: %v", err)
+		}
+		container.DeleteContainer(containerName)
 	}
 
-	mntURL := "/root/mnt/"
-	rootURL := "/root/"
-	container.DeleteWorkSpace(rootURL, mntURL, volume)
-	log.Print("exit")
+	// mntURL := "/root/mnt/"
+	// rootURL := "/root/"
+	// container.DeleteWorkSpace(rootURL, mntURL, volume)
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {
