@@ -19,6 +19,3 @@ var logsCmd = &cobra.Command{
 		container.Logs(args[0])
 	},
 }
-
-
-
