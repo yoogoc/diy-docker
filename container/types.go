@@ -17,3 +17,7 @@ type Container struct {
 	CreatedTime string `json:"created_time"`
 	Status      string `json:"status"`
 }
+
+func (c *Container) IsStop() bool {
+	return c.Status == STOP
+}
