@@ -9,10 +9,10 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-func NewWorkSpace(root string, mnt, volume string) {
-	CreateReadOnlyLayer(root)
-	CreateWriteOnlyLayer(root)
-	CreateMountPoint(root, mnt)
+func NewWorkSpace(volume, imageName, containerName string) {
+	CreateReadOnlyLayer(imageName)
+	CreateWriteOnlyLayer(containerName)
+	CreateMountPoint(containerName, imageName)
 	if volume == "" {
 		return
 	}
@@ -20,15 +20,16 @@ func NewWorkSpace(root string, mnt, volume string) {
 	if err != nil {
 		panic(err)
 	}
-	MountVolume(mnt, sourceV, targetV)
+	MountVolume(containerName, sourceV, targetV)
 }
 
-func MountVolume(mnt, sourceV, targetV string) {
+func MountVolume(containerName, sourceV, targetV string) {
 	if err := os.Mkdir(sourceV, 0777); err != nil {
 		logrus.Errorf("mkdir source dir %v error: %v", sourceV, err)
 	}
 
-	fullTargetV := mnt + targetV
+	mntUrl := fmt.Sprintf(MntUrl, containerName)
+	fullTargetV := mntUrl + "/" + targetV
 	if err := os.Mkdir(fullTargetV, 0777); err != nil {
 		logrus.Errorf("mkdir target dir %v error: %v", fullTargetV, err)
 	}
@@ -42,7 +43,6 @@ func MountVolume(mnt, sourceV, targetV string) {
 	}
 }
 
-
 func vUrlExtract(volume string) (string, string, error) {
 	vos := strings.Split(volume, ":")
 	if len(vos) == 2 && vos[0] != "" && vos[1] != "" {
@@ -53,9 +53,9 @@ func vUrlExtract(volume string) (string, string, error) {
 }
 
 // CreateReadOnlyLayer 创建只读层
-func CreateReadOnlyLayer(root string) {
-	bbUrl := root + "busybox/"
-	bbtUrl := root + "busybox.tar"
+func CreateReadOnlyLayer(imageName string) {
+	bbUrl := RootUrl + "/" + imageName + "/"
+	bbtUrl := RootUrl + "/" + imageName + ".tar"
 
 	fileExists, err := FileExists(bbUrl)
 	if err != nil {
@@ -75,20 +75,24 @@ func CreateReadOnlyLayer(root string) {
 }
 
 // CreateWriteOnlyLayer 创建只写层
-func CreateWriteOnlyLayer(root string) {
-	writeUrl := root + "writeUrl/"
-	if err := os.Mkdir(writeUrl, 0777); err != nil {
+func CreateWriteOnlyLayer(containerName string) {
+	writeUrl := fmt.Sprintf(WriteLayerUrl, containerName)
+	if err := os.MkdirAll(writeUrl, 0777); err != nil {
 		logrus.Errorf("mkdir %v error: %v", writeUrl, err)
 	}
 }
 
-func CreateMountPoint(root, mnt string) {
-	if err := os.Mkdir(mnt, 0777); err != nil {
-		logrus.Errorf("mkdir %v error: %v", mnt, err)
+func CreateMountPoint(containerName, imageName string) {
+	mntUrl := fmt.Sprintf(MntUrl, containerName)
+	if err := os.Mkdir(mntUrl, 0777); err != nil {
+		logrus.Errorf("mkdir %v error: %v", mntUrl, err)
 	}
 
-	dirs := "dirs=" + root + "writeUrl:" + root + "busybox"
-	cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", mnt)
+	tmpWriteLayer := fmt.Sprintf(WriteLayerUrl, containerName)
+	tmpImageLocation := RootUrl + "/" + imageName
+
+	dirs := "dirs=" + tmpWriteLayer + ":" + tmpImageLocation
+	cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", mntUrl)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -109,19 +113,20 @@ func FileExists(fileUrl string) (bool, error) {
 	}
 }
 
-func DeleteWorkSpace(rootUrl, mntUrl, volume string) {
+func DeleteWorkSpace(volume, containerName string) {
 	if volume != "" {
 		_, targetV, err := vUrlExtract(volume)
 		if err == nil {
-			UmountVolume(mntUrl, targetV)
+			UmountVolume(containerName, targetV)
 		}
 	}
 
-	DeleteMountPoint(mntUrl)
-	DeleteWriteLayer(rootUrl)
+	DeleteMountPoint(containerName)
+	DeleteWriteLayer(containerName)
 }
 
-func UmountVolume(mntUrl, targetV string) {
+func UmountVolume(containerName, targetV string) {
+	mntUrl := fmt.Sprintf(MntUrl, containerName)
 	fullTargetUrl := mntUrl + targetV
 	cmd := exec.Command("umount", fullTargetUrl)
 	cmd.Stdout = os.Stdout
@@ -132,7 +137,8 @@ func UmountVolume(mntUrl, targetV string) {
 	}
 }
 
-func DeleteMountPoint(mntUrl string) {
+func DeleteMountPoint(containerName string) {
+	mntUrl := fmt.Sprintf(MntUrl, containerName)
 	cmd := exec.Command("umount", mntUrl)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -146,8 +152,8 @@ func DeleteMountPoint(mntUrl string) {
 	}
 }
 
-func DeleteWriteLayer(rootUrl string) {
-	writeUrl := rootUrl + "writeUrl/"
+func DeleteWriteLayer(containerName string) {
+	writeUrl := fmt.Sprintf(WriteLayerUrl, containerName)
 	if err := os.RemoveAll(writeUrl); err != nil {
 		logrus.Errorf("mkdir %v error: %v", writeUrl, err)
 	}

@@ -15,8 +15,8 @@ var commitCmd = &cobra.Command{
 	Short: "commit a container to image",
 	Long:  `commit a container to image`,
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		container.CommitContainer(args[0])
+		container.CommitContainer(args[0], args[1])
 	},
 }

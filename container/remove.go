@@ -23,4 +23,6 @@ func Remove(name string) {
 		logrus.Errorf("rm files %v error: ", dirUrl, err)
 		return
 	}
+
+	DeleteWorkSpace(container.Volume, name)
 }

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"diy-docker/cgroups"
 	"diy-docker/cgroups/subsystems"
 	"diy-docker/container"
 	"diy-docker/utils"
@@ -57,7 +56,7 @@ func Run(commands []string) {
 	if containerName == "" {
 		containerName = id
 	}
-	parent, writePipe := container.NewParentProcess(tty, volume, containerName)
+	parent, writePipe := container.NewParentProcess(tty, volume, containerName, commands[0])
 
 	if parent == nil {
 		log.Fatal("New parent process error")
@@ -67,24 +66,24 @@ func Run(commands []string) {
 		logrus.Errorf("process start error: %v", err)
 	}
 
-	if _, err := container.RecordContainer(parent.Process.Pid, commands, containerName, id); err != nil {
+	if _, err := container.RecordContainer(parent.Process.Pid, commands[1:], containerName, id, volume); err != nil {
 		logrus.Errorf("record container error: %v", err)
 		return
 	}
 
-	cgroupManager := cgroups.NewCgroupManager("diy-docker-cgroup")
-	defer func(cgroupManager *cgroups.CgroupManager) {
-		log.Print("removing cgroup")
-		_ = cgroupManager.Destroy()
-	}(cgroupManager)
-
-	if err := cgroupManager.Set(&res); err != nil {
-		log.Fatal(err)
-	}
-
-	if err := cgroupManager.Apply(parent.Process.Pid); err != nil {
-		log.Fatal(err)
-	}
+	// cgroupManager := cgroups.NewCgroupManager("diy-docker-cgroup")
+	// defer func(cgroupManager *cgroups.CgroupManager) {
+	// 	log.Print("removing cgroup")
+	// 	_ = cgroupManager.Destroy()
+	// }(cgroupManager)
+	//
+	// if err := cgroupManager.Set(&res); err != nil {
+	// 	log.Fatal(err)
+	// }
+	//
+	// if err := cgroupManager.Apply(parent.Process.Pid); err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	sendInitCommand(commands, writePipe)
 
@@ -93,11 +92,8 @@ func Run(commands []string) {
 			logrus.Errorf("process wait error: %v", err)
 		}
 		container.DeleteContainer(containerName)
+		container.DeleteWorkSpace(volume, containerName)
 	}
-
-	// mntURL := "/root/mnt/"
-	// rootURL := "/root/"
-	// container.DeleteWorkSpace(rootURL, mntURL, volume)
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {

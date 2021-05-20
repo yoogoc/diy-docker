@@ -11,7 +11,7 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-func RecordContainer(pid int, commands []string, name string, id string) (string, error) {
+func RecordContainer(pid int, commands []string, name string, id string, volume string) (string, error) {
 
 	createdAt := time.Now().Format("2006-01-02 15:04:05")
 	commandString := strings.Join(commands, ",")
@@ -22,6 +22,7 @@ func RecordContainer(pid int, commands []string, name string, id string) (string
 		Command:     commandString,
 		CreatedTime: createdAt,
 		Status:      RUNNING,
+		Volume:      volume,
 	}
 
 	marshal, err := json.Marshal(container)
