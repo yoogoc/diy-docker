@@ -21,7 +21,7 @@ func ListContainers() {
 	var containers []*Container
 
 	for _, file := range files {
-		container, err := getContainer(file)
+		container, err := getContainer(file.Name())
 		if err != nil {
 			logrus.Errorf("read %v error: %v", dirUrl, err)
 			return
@@ -44,9 +44,8 @@ func ListContainers() {
 	}
 }
 
-func getContainer(file os.FileInfo) (*Container, error) {
-	name := file.Name()
-	configDir := fmt.Sprintf(DefaultContainerLocation, name)
+func getContainer(fileName string) (*Container, error) {
+	configDir := fmt.Sprintf(DefaultContainerLocation, fileName)
 	configDir = configDir + ConfigName
 	content, err := os.ReadFile(configDir)
 	if err != nil {
