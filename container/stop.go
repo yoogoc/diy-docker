@@ -19,7 +19,6 @@ func Stop(name string) {
 
 	pidInt, _ := strconv.Atoi(pid)
 
-
 	if err := syscall.Kill(pidInt, syscall.SIGTERM); err != nil {
 		logrus.Errorf("stop container %v error: %v", name, err)
 		return
@@ -28,7 +27,7 @@ func Stop(name string) {
 	container, err := getContainer(name)
 	if err != nil {
 		logrus.Errorf("get container %v meta error: %v", name, err)
-		return 
+		return
 	}
 
 	container.Status = STOP

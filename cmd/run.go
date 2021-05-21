@@ -14,12 +14,12 @@ import (
 )
 
 var (
-	tty    bool
-	detach bool
-	volume string
+	tty           bool
+	detach        bool
+	volume        string
 	containerName string
-	envs []string
-	res    = subsystems.ResourceConfig{}
+	envs          []string
+	res           = subsystems.ResourceConfig{}
 )
 
 func init() {

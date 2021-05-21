@@ -38,7 +38,7 @@ func MountVolume(containerName, sourceV, targetV string) {
 	cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", fullTargetV)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err:= cmd.Run(); err !=nil{
+	if err := cmd.Run(); err != nil {
 		logrus.Errorf("mount volume error: %v", fullTargetV, err)
 	}
 }
@@ -69,7 +69,7 @@ func CreateReadOnlyLayer(imageName string) {
 		logrus.Errorf("mkdir %s error: %v", bbUrl, err)
 	}
 
-	if _, err:= exec.Command("tar", "-xvf", bbtUrl, "-C", bbUrl).CombinedOutput(); err!=nil {
+	if _, err := exec.Command("tar", "-xvf", bbtUrl, "-C", bbUrl).CombinedOutput(); err != nil {
 		logrus.Errorf("tar %s error: %v", bbtUrl, err)
 	}
 }
@@ -132,7 +132,7 @@ func UmountVolume(containerName, targetV string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := cmd.Run();err != nil {
+	if err := cmd.Run(); err != nil {
 		logrus.Errorf("umount fullTargetUrl error: %v", err)
 	}
 }
@@ -143,7 +143,7 @@ func DeleteMountPoint(containerName string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	if err := cmd.Run();err != nil {
+	if err := cmd.Run(); err != nil {
 		logrus.Errorf("umount error: %v", err)
 	}
 

@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	environ = "/proc/%s/environ" 
+	environ = "/proc/%s/environ"
 )
 
 func GetEnvsByPid(pid string) []string {

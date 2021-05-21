@@ -8,7 +8,7 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-func Logs(containerName string)  {
+func Logs(containerName string) {
 	dirUrl := fmt.Sprintf(DefaultContainerLocation, containerName)
 	logFilePath := dirUrl + LogFile
 

@@ -16,7 +16,7 @@ var execCmd = &cobra.Command{
 	Use:   "exec",
 	Short: "container exec",
 	Long:  `container exec`,
-	Args: cobra.MinimumNArgs(0),
+	Args:  cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		if os.Getenv(container.ENV_EXEC_PID) == "" {
 			logrus.Info("1 exec")
@@ -26,4 +26,3 @@ var execCmd = &cobra.Command{
 		}
 	},
 }
-

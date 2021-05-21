@@ -7,7 +7,7 @@ import (
 
 type CgroupManager struct {
 	// cgroup在hierarchy中的路径 相当于创建的cgroup目录相对于root cgroup目录的路径
-	Path     string
+	Path string
 	// 资源配置
 	Resource *subsystems.ResourceConfig
 }
@@ -43,4 +43,3 @@ func (c *CgroupManager) Destroy() error {
 	}
 	return nil
 }
-

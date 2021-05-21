@@ -14,7 +14,7 @@ var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "container logs",
 	Long:  `container logs`,
-	Args: cobra.ExactArgs(1),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		container.Logs(args[0])
 	},
