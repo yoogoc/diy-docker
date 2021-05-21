@@ -9,7 +9,7 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-func NewParentProcess(tty bool, volume string, containerName, imageName string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume string, containerName, imageName string, envs []string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
 		logrus.Errorf("New pipe error %v", err)
@@ -44,7 +44,10 @@ func NewParentProcess(tty bool, volume string, containerName, imageName string) 
 
 		cmd.Stdout = stdLogFile
 	}
+
 	cmd.ExtraFiles = []*os.File{readPipe}
+	cmd.Env = append(os.Environ(), envs...)
+	logrus.Infof("env: %v", envs)
 
 	NewWorkSpace(volume, imageName, containerName)
 

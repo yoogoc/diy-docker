@@ -1,6 +1,7 @@
 package container
 
 import (
+	"diy-docker/utils"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -39,6 +40,9 @@ func Exec(name string, commands []string) {
 		logrus.Errorf("set env ENV_EXEC_CMD error: %v", err)
 		return
 	}
+
+	envs := utils.GetEnvsByPid(pid)
+	cmd.Env = append(os.Environ(), envs...)
 
 	if err := cmd.Run(); err != nil {
 		logrus.Errorf("run exec error: %v", err)

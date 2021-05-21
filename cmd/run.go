@@ -18,6 +18,7 @@ var (
 	detach bool
 	volume string
 	containerName string
+	envs []string
 	res    = subsystems.ResourceConfig{}
 )
 
@@ -30,6 +31,7 @@ func init() {
 	runCmd.PersistentFlags().StringVarP(&volume, "volume", "v", "", "volume")
 	runCmd.PersistentFlags().BoolVarP(&detach, "detach", "d", false, "detach run")
 	runCmd.PersistentFlags().StringVar(&containerName, "name", "", "set name")
+	runCmd.PersistentFlags().StringArrayVarP(&envs, "environment", "e", []string{}, "set environment")
 
 	rootCmd.AddCommand(runCmd)
 }
@@ -56,7 +58,7 @@ func Run(commands []string) {
 	if containerName == "" {
 		containerName = id
 	}
-	parent, writePipe := container.NewParentProcess(tty, volume, containerName, commands[0])
+	parent, writePipe := container.NewParentProcess(tty, volume, containerName, commands[0], envs)
 
 	if parent == nil {
 		log.Fatal("New parent process error")
