@@ -39,7 +39,7 @@ func MountVolume(containerName, sourceV, targetV string) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		logrus.Errorf("mount volume error: %v", fullTargetV, err)
+		logrus.Errorf("mount volume `%s` error: %v", fullTargetV, err)
 	}
 }
 

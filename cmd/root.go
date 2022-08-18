@@ -30,8 +30,8 @@ func Execute() {
 }
 
 var (
-	cfgFile     string
-	userLicense string
+	cfgFile string
+	// userLicense string
 )
 
 func init() {

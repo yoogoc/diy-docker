@@ -10,7 +10,7 @@ import (
 func Remove(name string) {
 	container, err := getContainer(name)
 	if err != nil {
-		logrus.Errorf("rm %v error: ", name, err)
+		logrus.Errorf("rm %v error: %v", name, err)
 		return
 	}
 
@@ -20,7 +20,7 @@ func Remove(name string) {
 	}
 	dirUrl := fmt.Sprintf(DefaultContainerLocation, name)
 	if err := os.RemoveAll(dirUrl); err != nil {
-		logrus.Errorf("rm files %v error: ", dirUrl, err)
+		logrus.Errorf("rm files %v error: %v", dirUrl, err)
 		return
 	}
 

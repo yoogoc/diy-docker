@@ -3,7 +3,6 @@ package container
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"text/tabwriter"
 
@@ -13,7 +12,7 @@ import (
 func ListContainers() {
 	dirUrl := fmt.Sprintf(DefaultContainerLocation, "")
 	dirUrl = dirUrl[:len(dirUrl)-1]
-	files, err := ioutil.ReadDir(dirUrl)
+	files, err := os.ReadDir(dirUrl)
 	if err != nil {
 		logrus.Errorf("read container location error: %v", err)
 		return
