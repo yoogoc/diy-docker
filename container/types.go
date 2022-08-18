@@ -7,9 +7,10 @@ var (
 	DefaultContainerLocation = "/var/run/diydocker/%s/"
 	ConfigName               = "config.json"
 	LogFile                  = "container.log"
-	RootUrl                  = "/root"
-	MntUrl                   = "/root/mnt/%s"
-	WriteLayerUrl            = "/root/writeLayer/%s"
+	RootUrl                  = "/root/diydocker"
+	MntUrl                   = "/root/diydocker/mnt/%s"
+	TmpWorkUrl               = "/root/diydocker/tmp/work/%s"
+	WriteLayerUrl            = "/root/diydocker/writeLayer/%s"
 )
 
 type Container struct {

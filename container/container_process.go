@@ -16,6 +16,7 @@ func NewParentProcess(tty bool, volume string, containerName, imageName string, 
 		return nil, nil
 	}
 
+	// /proc/self/exe: 将进程内容全部替换、重新装载进程
 	cmd := exec.Command("/proc/self/exe", "init")
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS |
@@ -55,6 +56,7 @@ func NewParentProcess(tty bool, volume string, containerName, imageName string, 
 	return cmd, writePipe
 }
 
+// NewPipe 声明一个新的管道,用于进程间通讯
 func NewPipe() (*os.File, *os.File, error) {
 	read, write, err := os.Pipe()
 	if err != nil {

@@ -54,10 +54,12 @@ var runCmd = &cobra.Command{
 }
 
 func Run(commands []string) {
+	// 生成随机id
 	id := utils.RandStringBytes(10)
 	if containerName == "" {
 		containerName = id
 	}
+	// 初始化进程环境和资源
 	parent, writePipe := container.NewParentProcess(tty, volume, containerName, commands[0], envs)
 
 	if parent == nil {
@@ -87,14 +89,14 @@ func Run(commands []string) {
 	// 	log.Fatal(err)
 	// }
 
-	sendInitCommand(commands, writePipe)
+	sendInitCommand(commands[1:], writePipe)
 
 	if tty {
 		if err := parent.Wait(); err != nil {
 			logrus.Errorf("process wait error: %v", err)
 		}
 		container.DeleteContainer(containerName)
-		container.DeleteWorkSpace(volume, containerName)
+		// container.DeleteWorkSpace(volume, containerName)
 	}
 }
 

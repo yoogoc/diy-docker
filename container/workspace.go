@@ -62,6 +62,7 @@ func CreateReadOnlyLayer(imageName string) {
 		logrus.Errorf("check file exists error: %v", err)
 	}
 	if fileExists {
+		logrus.Warn("image dir exists")
 		return
 	}
 
@@ -84,17 +85,24 @@ func CreateWriteOnlyLayer(containerName string) {
 
 func CreateMountPoint(containerName, imageName string) {
 	mntUrl := fmt.Sprintf(MntUrl, containerName)
-	if err := os.Mkdir(mntUrl, 0777); err != nil {
+	tmpWorkUrl := fmt.Sprintf(TmpWorkUrl, containerName)
+	if err := os.MkdirAll(mntUrl, 0777); err != nil {
 		logrus.Errorf("mkdir %v error: %v", mntUrl, err)
+	}
+	if err := os.MkdirAll(tmpWorkUrl, 0777); err != nil {
+		logrus.Errorf("mkdir %v error: %v", tmpWorkUrl, err)
 	}
 
 	tmpWriteLayer := fmt.Sprintf(WriteLayerUrl, containerName)
 	tmpImageLocation := RootUrl + "/" + imageName
 
-	dirs := "dirs=" + tmpWriteLayer + ":" + tmpImageLocation
-	cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", mntUrl)
+	// dirs := "dirs=" + tmpWriteLayer + ":" + tmpImageLocation
+	// cmd := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", mntUrl)
+	dirs := fmt.Sprintf("lowerdir=%s,upperdir=%s,workdir=%s", tmpImageLocation, tmpWriteLayer, tmpWorkUrl)
+	cmd := exec.Command("mount", "-t", "overlay", "overlay", "-o", dirs, mntUrl)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	logrus.Infof("current mount is: %s", cmd.String())
 
 	if err := cmd.Run(); err != nil {
 		logrus.Errorf("mount error: %v", err)
